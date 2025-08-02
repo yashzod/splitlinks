@@ -1,3 +1,3 @@
-module github.com-personal/yashzod/splitlink
+module github.com/yashzod/splitlinks
 
 go 1.24.2
