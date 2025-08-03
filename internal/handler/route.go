@@ -23,3 +23,7 @@ func Route(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, link, http.StatusFound)
 }
+
+func CreateExperiment(w http.ResponseWriter, r *http.Request) {
+
+}
