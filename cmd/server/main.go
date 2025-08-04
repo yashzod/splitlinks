@@ -10,6 +10,7 @@ import (
 func main() {
 	http.HandleFunc("/r/", handler.Route)
 	http.HandleFunc("/create_experiment/", handler.CreateExperiment)
+	http.HandleFunc("/get_experiment", handler.GetExperiment)
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

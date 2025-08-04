@@ -31,12 +31,43 @@ func Route(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateExperiment(w http.ResponseWriter, r *http.Request) {
-
 	var data map[string]interface{}
+
+	// Parse JSON body
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		http.Error(w, "Something went wrong.", http.StatusNotFound)
+		fmt.Println("JSON decode error:", err)
+		http.Error(w, "decode error", http.StatusBadRequest)
+		return
 	}
-	service.CreateExperiment(data, db)
-	fmt.Println(data)
+
+	// Call service layer to create experiment
+	err = service.CreateExperiment(data, db)
+	if err != nil {
+		http.Error(w, "Failed to create experiment", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond success
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "Experiment created successfully")
+}
+
+func GetExperiment(w http.ResponseWriter, r *http.Request) {
+	slug := r.URL.Query().Get("slug")
+	if slug == "" {
+		http.Error(w, "Missing slug", http.StatusBadRequest)
+		return
+	}
+
+	query := map[string]string{"slug": slug}
+
+	exp, err := service.GetExperiment(query, db)
+	if err != nil {
+		http.Error(w, "Experiment not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(exp)
 }
