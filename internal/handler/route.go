@@ -21,7 +21,7 @@ func Route(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	link, err := service.GetRedirectLink(slug)
+	link, err := service.GetRedirectLink(slug, db)
 	if err != nil {
 		http.Error(w, "Url not found or expired", http.StatusNotFound)
 	}
