@@ -6,9 +6,13 @@ import (
 	"math/rand"
 	"time"
 
+	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/yashzod/splitlinks/internal/model"
 	"gorm.io/gorm"
+
+	"gorm.io/datatypes"
 )
 
 var slug_map = map[string]string{
@@ -21,6 +25,13 @@ func GetRedirectLink(slug string) (string, error) {
 		return "", errors.New("slug not found")
 	}
 	return link, nil
+}
+
+func GetExperiment(query map[string]string, db *gorm.DB) (interface{}, error) {
+	var exp model.Experiment
+	slug := query["slug"]
+	err := db.Where("slug = ?", slug).First(&exp).Error
+	return exp, err
 }
 
 func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
@@ -39,6 +50,9 @@ func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
 	if err != nil {
 		return err
 	}
+	println("slug exp created")
+
+	fmt.Printf("slug: %s\n", slug)
 
 	experiment := model.Experiment{
 		ID:        experimentID,
@@ -47,12 +61,11 @@ func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
 		CreatedAt: time.Now(),
 	}
 
-	if md, ok := expData["metadata"].(map[string]interface{}); ok {
-		metadata := make(map[string]string)
-		for k, v := range md {
-			metadata[k] = fmt.Sprintf("%v", v)
+	if md, ok := expData["metadata"]; ok {
+		jsonVal, err := json.Marshal(md)
+		if err == nil {
+			experiment.Metadata = datatypes.JSON(jsonVal)
 		}
-		experiment.Metadata = metadata
 	}
 
 	if err := db.Create(&experiment).Error; err != nil {
@@ -65,16 +78,14 @@ func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
 			continue
 		}
 
-		targeting := make(map[string][]string)
-		if rawTargeting, ok := vMap["targeting"].(map[string]interface{}); ok {
-			for k, val := range rawTargeting {
-				if arr, ok := val.([]interface{}); ok {
-					strs := make([]string, len(arr))
-					for i, item := range arr {
-						strs[i] = fmt.Sprintf("%v", item)
-					}
-					targeting[k] = strs
-				}
+		var targeting datatypes.JSON
+
+		if rawTargeting, ok := vMap["targeting"]; ok {
+			jsonVal, err := json.Marshal(rawTargeting)
+			if err != nil {
+				fmt.Println("Error marshalling targeting:", err)
+			} else {
+				targeting = datatypes.JSON(jsonVal)
 			}
 		}
 
