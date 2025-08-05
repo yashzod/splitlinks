@@ -34,6 +34,26 @@ func pickVariant(variants []model.Variant) model.Variant {
 	return variants[0]
 }
 
+func pickVariant(variants []model.Variant) model.Variant {
+	total := 0
+	for _, v := range variants {
+		total += v.Weight
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	r := rand.Intn(total)
+
+	sum := 0
+	for _, v := range variants {
+		sum += v.Weight
+		if r < sum {
+			return v
+		}
+	}
+	return variants[0]
+}
+
+
 func GetRedirectLink(slug string, db *gorm.DB) (string, error) {
 	var exp model.Experiment
 	err := db.Where("slug = ?", slug).First(&exp).Error
