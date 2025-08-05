@@ -34,27 +34,7 @@ func pickVariant(variants []model.Variant) model.Variant {
 	return variants[0]
 }
 
-func pickVariant(variants []model.Variant) model.Variant {
-	total := 0
-	for _, v := range variants {
-		total += v.Weight
-	}
-
-	rand.Seed(time.Now().UnixNano())
-	r := rand.Intn(total)
-
-	sum := 0
-	for _, v := range variants {
-		sum += v.Weight
-		if r < sum {
-			return v
-		}
-	}
-	return variants[0]
-}
-
-
-func GetRedirectLink(slug string, db *gorm.DB) (string, error) {
+func GetRedirectLink(db *gorm.DB, slug string) (string, error) {
 	var exp model.Experiment
 	err := db.Where("slug = ?", slug).First(&exp).Error
 	if err != nil {
@@ -79,7 +59,7 @@ func GetExperiment(query map[string]string, db *gorm.DB) (interface{}, error) {
 	return exp, err
 }
 
-func CreateExperiment(data map[string]interface{}, db *gorm.DB) (string, error) {
+func CreateExperiment(db *gorm.DB, data map[string]interface{}) (string, error) {
 	expData, ok := data["experiment"].(map[string]interface{})
 	if !ok {
 		return "", errors.New("invalid or missing experiment data")
