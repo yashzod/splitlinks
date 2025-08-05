@@ -42,7 +42,7 @@ func CreateExperiment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call service layer to create experiment
-	err = service.CreateExperiment(data, db)
+	slug, err := service.CreateExperiment(data, db)
 	if err != nil {
 		http.Error(w, "Failed to create experiment", http.StatusInternalServerError)
 		return
@@ -50,7 +50,11 @@ func CreateExperiment(w http.ResponseWriter, r *http.Request) {
 
 	// Respond success
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "Experiment created successfully")
+	response := map[string]string{"slug": slug}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+
 }
 
 func GetExperiment(w http.ResponseWriter, r *http.Request) {
