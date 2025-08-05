@@ -15,10 +15,6 @@ import (
 	"gorm.io/datatypes"
 )
 
-var slug_map = map[string]string{
-	"abc": "https://google.com",
-}
-
 func pickVariant(variants []model.Variant) model.Variant {
 	total := 0
 	for _, v := range variants {
@@ -63,21 +59,21 @@ func GetExperiment(query map[string]string, db *gorm.DB) (interface{}, error) {
 	return exp, err
 }
 
-func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
+func CreateExperiment(data map[string]interface{}, db *gorm.DB) (string, error) {
 	expData, ok := data["experiment"].(map[string]interface{})
 	if !ok {
-		return errors.New("invalid or missing experiment data")
+		return "", errors.New("invalid or missing experiment data")
 	}
 
 	variantsData, ok := data["variants"].([]interface{})
 	if !ok || len(variantsData) == 0 {
-		return errors.New("invalid or missing variants data")
+		return "", errors.New("invalid or missing variants data")
 	}
 
 	experimentID := uuid.New()
 	slug, err := generateUniqueSlug(db)
 	if err != nil {
-		return err
+		return "", err
 	}
 	println("slug exp created")
 
@@ -98,7 +94,7 @@ func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
 	}
 
 	if err := db.Create(&experiment).Error; err != nil {
-		return err
+		return "", err
 	}
 
 	for _, v := range variantsData {
@@ -128,11 +124,11 @@ func CreateExperiment(data map[string]interface{}, db *gorm.DB) error {
 		}
 
 		if err := db.Create(&variant).Error; err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	return nil
+	return slug, nil
 }
 
 func generateUniqueSlug(db *gorm.DB) (string, error) {
