@@ -52,11 +52,17 @@ func GetRedirectLink(db *gorm.DB, slug string) (string, error) {
 	return link, err
 }
 
-func GetExperiment(query map[string]string, db *gorm.DB) (interface{}, error) {
-	var exp model.Experiment
+func GetExperiment(query map[string]string, db *gorm.DB) ([]interface{}, error) {
+	var exps []interface{}
 	slug := query["slug"]
-	err := db.Where("slug = ?", slug).First(&exp).Error
-	return exp, err
+	if slug != "" {
+		err := db.Where("slug = ?", slug).Find(&exps).Error
+		return exps, err
+	}
+	user_id := query["user_id"]
+	err := db.Where("CreatedID = ?", user_id).Find(&exps).Error
+	return exps, err
+
 }
 
 func CreateExperiment(db *gorm.DB, data map[string]interface{}) (string, error) {
