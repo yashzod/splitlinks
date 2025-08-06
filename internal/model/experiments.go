@@ -8,11 +8,12 @@ import (
 )
 
 type Experiment struct {
-	ID        uuid.UUID      `gorm:"type:uuid;primaryKey"`
-	Slug      string         `gorm:"uniqueIndex"`
-	Metadata  datatypes.JSON `gorm:"type:jsonb"`
-	CreatedAt time.Time
-	Name      string
+	ID          uuid.UUID      `gorm:"type:uuid;primaryKey"`
+	Slug        string         `gorm:"uniqueIndex"`
+	Metadata    datatypes.JSON `gorm:"type:jsonb"`
+	CreatedAt   time.Time
+	Name        string
+	CreatedByID uuid.UUID `gorm:"type:uuid;index;not null" json:"created_by_id"`
 }
 
 type Variant struct {

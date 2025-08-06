@@ -18,6 +18,7 @@ func InitDB() *gorm.DB {
 	// Auto-migrate your models
 	db.AutoMigrate(&model.Experiment{})
 	db.AutoMigrate(&model.Variant{})
+	db.AutoMigrate(&model.User{})
 
 	return db
 }
