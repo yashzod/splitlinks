@@ -86,10 +86,11 @@ func CreateExperiment(db *gorm.DB, data map[string]interface{}) (string, error) 
 	fmt.Printf("slug: %s\n", slug)
 
 	experiment := model.Experiment{
-		ID:        experimentID,
-		Slug:      slug,
-		Name:      expData["name"].(string),
-		CreatedAt: time.Now(),
+		ID:          experimentID,
+		Slug:        slug,
+		Name:        expData["name"].(string),
+		CreatedAt:   time.Now(),
+		CreatedByID: expData["created_by"].(string),
 	}
 
 	if md, ok := expData["metadata"]; ok {
